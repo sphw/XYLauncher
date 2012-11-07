@@ -10,24 +10,42 @@ namespace Launcher
 {
     class DownloadManager
     {
+        
         public  void DownloadModPack(string url) {
+            string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             using (WebClient webClient = new WebClient())
             {
-                webClient.DownloadFile(new Uri("http://xylocraft.com/ModPack/" + url), Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/.xylotech/" + url);
-                if (!File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/.xylotech/launch.bat"))
+                webClient.DownloadFile(new Uri("http://xylocraft.com/ModPack/" + url), appData + "/.xylotech/" + url);
+                webClient.DownloadFile(new Uri("http://assets.minecraft.net/1_4_2/minecraft.jar"),appData + "/.xylotech/minecraft.jar");
+                if (!File.Exists(appData + "/.xylotech/launch.bat"))
                 {
-                    webClient.DownloadFile("http://xylocraft.com/launch.bat", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/.xylotech/launch.bat");
+                    webClient.DownloadFile("http://xylocraft.com/launch.bat", appData + "/.xylotech/launch.bat");
                 }
                
             }
             
             string[] lines = { "true", "" };
-            System.IO.File.WriteAllLines(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/.xylotech/config", lines);
+            System.IO.File.WriteAllLines(appData + "/.xylotech/config", lines);
         }
         public void InstallModPack(string zipName) {
-            using (ZipFile zip = ZipFile.Read(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/.xylotech/" + zipName))
+            string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData).ToString();
+            using (ZipFile zip = ZipFile.Read(appData + "/.xylotech/" + zipName))
             {
-                zip.ExtractAll(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/.xylotech/");
+                zip.ExtractAll(appData + "/.xylotech/");
+            }
+            if(File.Exists(appData + "/.xylotech/.minecraft/minecraft.jar") == true){
+                File.Delete(appData + "/.xylotech/.minecraft/minecraft.jar");
+            }
+            using (ZipFile zip = ZipFile.Read(appData + "/.xylotech/")) {
+                zip.ExtractAll(appData + "/.xylotech/minecraft.jar");
+            }
+            foreach(string line in File.ReadAllLines(appData + "/.xylotech/modlist")){
+                using(ZipFile zip = ZipFile.Read(appData + "/.xylotech/modlist/" + line){
+                    zip.ExtractAll(appData + "/.xylotech/minecraft.jar");
+                }
+            }
+            using(ZipFile zip = new ZipFile()){
+                 
             }
         }
     }
