@@ -36,16 +36,19 @@ namespace Launcher
             if(File.Exists(appData + "/.xylotech/.minecraft/minecraft.jar") == true){
                 File.Delete(appData + "/.xylotech/.minecraft/minecraft.jar");
             }
-            using (ZipFile zip = ZipFile.Read(appData + "/.xylotech/")) {
-                zip.ExtractAll(appData + "/.xylotech/minecraft.jar");
+            using (ZipFile zip = ZipFile.Read(appData + "/.xylotech/minecraft.jar")) {
+                zip.ExtractAll(appData + "/.xylotech/minecraftT.jar");
             }
             foreach(string line in File.ReadAllLines(appData + "/.xylotech/modlist")){
-                using(ZipFile zip = ZipFile.Read(appData + "/.xylotech/modlist/" + line){
-                    zip.ExtractAll(appData + "/.xylotech/minecraft.jar");
+                using(ZipFile zip = ZipFile.Read(appData + "/.xylotech/modlist/" + line)){
+                    zip.ExtractAll(appData + "/.xylotech/minecraftT.jar");
                 }
             }
             using(ZipFile zip = new ZipFile()){
-                 
+                 foreach(string f in Directory.GetDirectories(appData + "/.xylotech/minecraftT.jar")){
+                    zip.AddFile(f); 
+                 }
+                 zip.Save(appData + "/.xylotech/.minecraft/minecraft.jar");
             }
         }
     }
