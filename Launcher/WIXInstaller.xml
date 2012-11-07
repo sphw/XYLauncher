@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="Windows-1252" ?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Name="Launcher 1.0" Id="d1db778a-2430-44f1-a0ce-7604a0bfe82d" UpgradeCode="8d10292d-1159-494d-81ec-a83e56cac3ab" Language="1033" Codepage="1252" Version="1.0.0" Manufacturer="XWSAW">
+    <Package Id="*" Keywords="Launcher Installer" Description="XWSAW's Minecraft Launcher" Comments="Copyright 2012 Wise Enterprise" Manufacturer="XWSAW" InstallerVersion="100" Languages="1033" Compressed="yes" SummaryCodepage="1252"/>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id='ProgramFilesFolder' Name='PFiles'>
+        <Directory Id='INSTALLDIR' Name='XYLauncher 1.0'></Directory>
+      </Directory>  
+    </Directory>
+
+    <Component Id='MainExec' Directory='' Guid='52a696bd-b0b5-4cb9-b3c9-120a54842d22'>
+      <File Id='LauncherEXE' Name='Launcher.exe' DiskId='1' Source='Launcher.exe' KeyPath='yes'>
+        <Shortcut Id='starmenuXYLauncher100' Directory='ProgramMenuDir' Name='XYLauncher' Icon='Launcher.exe'></Shortcut>
+      </File>
+      <File Id='Ionic' Name='Ionic.Zip.dll' DiskId='1' Source='Ionic.Zip.dll' KeyPath='yes'/>
+      <File Id='Metro' Name='MahApps.Metro.dll' DiskId='1' Source='MahApps.Metro.dll' KeyPath='yes'/>
+      <File Id='WindowsInter' Name='System.Windows.Interactivity.dll' DiskId='1' Source='System.Windows.Interactivity.dll' KeyPath='yes'/> 
+    </Component>
+    <Directory Id="ProgramMenuFolder" Name="Programs">
+        <Directory Id="ProgramMenuDir" Name="XYLauncher">
+          <Component Id="ProgramMenuDir" Guid="77635265-bb78-42d5-8b2a-95a85e59278b">
+            <RemoveFolder Id='ProgramMenuDir' On='uninstall' />
+            <RegistryValue Root='HKCU' Key='Software\[Manufacturer]\[ProductName]' Type='string' Value='' KeyPath='yes' />
+          </Component>
+        </Directory>
+      </Directory>
+    <Feature Id='Complete' Level='1'>
+      <ComponentRef Id='MainExec'/>
+    </Feature>
+    <Icon Id='Launcher.exe' SourceFile='Launcher.exe'/>
+  </Product>
+</Wix> 
