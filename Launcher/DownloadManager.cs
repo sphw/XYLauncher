@@ -11,7 +11,25 @@ namespace Launcher
 {
     class DownloadManager
     {
-        
+
+        public FileStream CreateConfigs() {
+            using (FileStream config = new FileStream(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/.xylotech/config", FileMode.OpenOrCreate)) { }
+            FileStream logindata = new FileStream(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/.xylotech/logindata", FileMode.OpenOrCreate);
+            return logindata;
+        }
+        public void DeleteCurrentPack() {
+            string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            foreach (string f in Directory.GetFiles(appData + "/.xylotech","*")) {
+                if (f != appData + "/.xylotech\\logindata") {
+                    Debug.Write(f);
+                    File.Delete(f);                    
+                }
+            }
+            foreach (string f in Directory.GetDirectories(appData + "/.xylotech")) {
+                Directory.Delete(f,true);
+            }
+            CreateConfigs();
+        }
         public  void DownloadModPack(string url) {
             string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             using (WebClient webClient = new WebClient())
@@ -27,41 +45,6 @@ namespace Launcher
             
             string[] lines = { "true", "" };
             System.IO.File.WriteAllLines(appData + "/.xylotech/config", lines);
-        }
-        List<string> DirSearch(string dir, string pattern)
-        {
-            List<string> tList = new List<string>();
-
-            try
-            {
-                foreach (string f in Directory.GetFiles(dir)) {
-                    tList.Add(f);
-                    Debug.Write(f);
-                        
-                }
-                foreach (string d in Directory.GetDirectories(dir))
-                {
-
-                    foreach (string f in Directory.GetFiles(d, pattern))
-                    {
-                        tList.Add(f);
-                        Debug.Write(f);
-                    }
-
-                    DirSearch(d,"*");
-
-                }
-                return tList;
-
-            }
-
-            catch (Exception ex)
-            {
-                return null;
-                Console.WriteLine("Something unexpected happened: {0}", ex);
-
-            }
-
         }
         public void InstallModPack(string zipName) {
             string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData).ToString();

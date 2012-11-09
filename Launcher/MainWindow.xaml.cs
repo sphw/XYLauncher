@@ -27,19 +27,23 @@ namespace Launcher
     {
         List<string[]> modpacks = new List<string[]>();
         LoginManager loginM = new LoginManager();
-        BackgroundWorker worker = new BackgroundWorker();
+        BackgroundWorker downWorker = new BackgroundWorker();
+        BackgroundWorker updateWorker = new BackgroundWorker();
+        Properties.Settings settings = new Properties.Settings();
         int Selected;
         public MainWindow()
         {
-            string xml = new System.Net.WebClient().DownloadString("http://xylocraft.com/ModPack/modpacks.xml");
+            string xml = new System.Net.WebClient().DownloadString(settings.ModPack);
             InitializeComponent();
-            worker.DoWork += BackgroundWorker_Work;
-            worker.RunWorkerCompleted += BackgroundWorker_Complete;
+            downWorker.DoWork += DownloadWorker_Work;
+            downWorker.RunWorkerCompleted += DownloadWorker_Complete;
+            updateWorker.DoWork += UpdateWorker_Work;
+            updateWorker.RunWorkerCompleted += UpdateWorker_Complete;
             if (!File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/.xylotech/"))
                 System.IO.Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/.xylotech/");
             Head.Source = loginM.GetHeadIcon();
-            FileStream logindata = new FileStream(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/.xylotech/logindata", FileMode.OpenOrCreate);
-            using (FileStream config = new FileStream(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/.xylotech/config", FileMode.OpenOrCreate)) { }
+            DownloadManager downM = new DownloadManager();
+            FileStream logindata = downM.CreateConfigs();
             using (StreamReader reader = new StreamReader(logindata))
             {
                 Username.Text = reader.ReadLine();
@@ -107,43 +111,89 @@ namespace Launcher
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            Progress.Visibility = Visibility.Visible;
-            loginM.SaveLoginData(Username.Text, Password.Password);
-            DownloadManager downM = new DownloadManager();
-            string modPackDown;
-            using (StreamReader reader = new StreamReader(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/.xylotech/config"))
+            if (loginM.CheckLogin(Username.Text, Password.Password) == true)
             {
-                modPackDown = reader.ReadLine();
-            }
-            if (modPackDown == null)
-            {
-                worker.RunWorkerAsync();
-            }
-            else if(modPackDown == "true") {
-                loginM.LaunchMinecraft(Username.Text, Password.Password);
-                Progress.Visibility = Visibility.Hidden;
-                Application.Current.Shutdown();
+                Progress.Visibility = Visibility.Visible;
+                if (settings.Password == true)
+                {
+                    loginM.SaveLoginData(Username.Text, Password.Password);
+                }
+                DownloadManager downM = new DownloadManager();
+                string modPackDown;
+                using (StreamReader reader = new StreamReader(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/.xylotech/config"))
+                {
+                    modPackDown = reader.ReadLine();
+                }
+                if (modPackDown == null)
+                {
+                    downWorker.RunWorkerAsync();
+                }
+                else if (modPackDown == "true")
+                {
+
+                    loginM.LaunchMinecraft(Username.Text, Password.Password);
+                    Progress.Visibility = Visibility.Hidden;
+                    if (settings.CloseLaunch == true)
+                    {
+                        Application.Current.Shutdown();
+                    }
+                }
             }
         }
-        private void BackgroundWorker_Complete(object s, RunWorkerCompletedEventArgs e)
+        private void DownloadWorker_Complete(object s, RunWorkerCompletedEventArgs e)
         {
             loginM.LaunchMinecraft(Username.Text, Password.Password);
             Progress.Visibility = Visibility.Hidden;
-            Application.Current.Shutdown();
-            
+            if (settings.CloseLaunch == true)
+            {
+                Application.Current.Shutdown();
+            }
         }
-        private void BackgroundWorker_Work(object sender, DoWorkEventArgs e)
+        private void DownloadWorker_Work(object sender, DoWorkEventArgs e)
         {
             DownloadManager downM = new DownloadManager();
             downM.DownloadModPack(modpacks[Selected][5]);
             downM.InstallModPack(modpacks[Selected][5]);
         }
+        private void UpdateWorker_Work(object sender, DoWorkEventArgs e) { 
+            DownloadManager downM = new DownloadManager();
+            downM.DeleteCurrentPack();
+            downM.DownloadModPack(modpacks[Selected][5]);
+            downM.InstallModPack(modpacks[Selected][5]);
+        }
+        private void UpdateWorker_Complete(object sender, RunWorkerCompletedEventArgs e) {
+            Progress.Visibility = Visibility.Hidden;
+            if (loginM.CheckLogin(Username.Text, Password.Password))
+            {
+                if (settings.LaunchUpdate == true)
+                {
+                    loginM.LaunchMinecraft(Username.Text, Password.Password);
+                    if (settings.CloseLaunch == true)
+                    {
+                        Application.Current.Shutdown();
+                    }
+                }
+            }
+        } 
         string GetLine(string fileName, int line)
         {
             using (var sr = new StreamReader(fileName))
             {
                 return sr.ReadLine();
             }
+        }
+
+        private void Update_Click(object sender, RoutedEventArgs e)
+        {
+            Progress.Visibility = Visibility.Visible;
+            updateWorker.RunWorkerAsync();
+
+        }
+
+        private void Settings_Click(object sender, RoutedEventArgs e)
+        {
+            SettingsWindow sW = new SettingsWindow();
+            sW.Show();
         }
     }
 }

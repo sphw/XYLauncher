@@ -38,9 +38,23 @@ namespace Launcher
                 return headBit;
             }
         }
+        public bool CheckLogin(string email, string pass) {
+            string res = Util.generateSession(email, pass,13);
+            if (res == "Bad login")
+            {
+                //TODO Display Error Mesesage
+                ErrorWindow error = new ErrorWindow();
+                error.Error.Content = "Bad Login";
+                error.Show();
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
         public void SaveLoginData(string email, string pass)
         {
-            string res = Login.generateSession(email, pass, 13);
+            string res = Util.generateSession(email, pass, 13);
             string user = res.Split(':')[2];
             string[] lines = { email, pass,user };
             System.IO.File.WriteAllLines(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/.xylotech/logindata", lines);
@@ -48,7 +62,8 @@ namespace Launcher
         public void LaunchMinecraft(string email, string pass)
         {
             string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\"; 
-            string res = Login.generateSession(email, pass, 13);
+            string res = Util.generateSession(email, pass, 13);
+            ErrorWindow error = new ErrorWindow();
             string sesID = res.Split(':')[3];
             string user = res.Split(':')[2];
             //Login.startMinecraft(true,256,1024,user,sesID,true);
@@ -60,7 +75,6 @@ namespace Launcher
             proc.StartInfo.Arguments = user + " " + sesID;
             //System.Diagnostics.Process.Start(appData  + ".xylotech/" + "launch.bat", user + " " + sesID);
             proc.Start();
-
         }
        
 

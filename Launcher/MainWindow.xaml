@@ -13,7 +13,7 @@
     </Controls:MetroWindow.Resources>
     <Controls:MetroWindow.WindowCommands>
         <Controls:WindowCommands>
-            <Button Content="Settings" />
+            <Button Content="Settings" Click="Settings_Click" />
         </Controls:WindowCommands>
     </Controls:MetroWindow.WindowCommands>
     <Grid>
@@ -32,7 +32,11 @@
         <WebBrowser x:Name="newsBrowser" Grid.Column="2" HorizontalAlignment="Left" Height="549" Margin="5,10,0,0" VerticalAlignment="Top" Width="375" Grid.RowSpan="2"/>
         <Image x:Name="Splash" Grid.Column="3" HorizontalAlignment="Left" Height="198" Margin="10,108,0,0" VerticalAlignment="Top" Width="298" Grid.ColumnSpan="2"/>
         <TextBlock x:Name="Name" Grid.Column="3" HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="68" Width="298" FontSize="30" Grid.ColumnSpan="2"><Run/><LineBreak/><Run Text=""/></TextBlock>
-        <Image x:Name="Head" Grid.Column="3" HorizontalAlignment="Left" Height="100" Margin="110,4,0,0" VerticalAlignment="Top" Width="100" Grid.ColumnSpan="2" Grid.Row="1"/>
+        <Image x:Name="Head" Grid.Column="3" HorizontalAlignment="Left" Height="100" Margin="110,1,0,0" VerticalAlignment="Top" Width="100" Grid.ColumnSpan="2" Grid.Row="1">
+            <Image.Effect>
+                <DropShadowEffect Direction="360" RenderingBias="Quality" BlurRadius="25" ShadowDepth="3"/>
+            </Image.Effect>
+        </Image>
         <TextBox x:Name="Username" Grid.Column="3" Controls:TextboxHelper.ClearTextButton="True"  HorizontalAlignment="Left" Height="26" Margin="10,159,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="163" Grid.ColumnSpan="2"/>
         <PasswordBox x:Name="Password" Grid.Column="3"  HorizontalAlignment="Left" Margin="10,190,0,0" Grid.Row="1" VerticalAlignment="Top" Width="163" Height="26" Grid.ColumnSpan="2"/>
         <Button Content="Login" Grid.Column="3" HorizontalAlignment="Left" Style="{DynamicResource SquareButtonStyle}" Margin="122,221,0,0" Grid.Row="1" VerticalAlignment="Top" Width="75" Click="Button_Click_1" Grid.ColumnSpan="2" Height="25"/>
@@ -48,6 +52,7 @@
                 </TransformGroup>
             </Controls:ProgressRing.RenderTransform>
         </Controls:ProgressRing>
+        <Button Content="Update" Grid.Column="3" HorizontalAlignment="Left" Style="{DynamicResource SquareButtonStyle}" Margin="29,221,0,0" Grid.Row="1" VerticalAlignment="Top" Width="75" Click="Update_Click" Height="25"/>
 
 
 
