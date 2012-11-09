@@ -11,7 +11,7 @@ using System.Diagnostics;
 
 namespace Launcher
 {
-    public class Login
+    public class Util
     {
         /// <summary>
         /// Used to generate a session with login.minecraft.net for online use only
