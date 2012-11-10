@@ -11,16 +11,16 @@ namespace Launcher
 {
     class LoginManager
     {
-        public BitmapImage GetHeadIcon()
+        public BitmapImage GetHeadIcon(string dir)
         {
             BitmapImage headBit = new BitmapImage();
-            if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/.xylotech/logindata"))
+            if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/" + dir + "/" + "logindata"))
             {
                 headBit.BeginInit();
                 string line1;
                 string line2;
                 string line3;
-                using (StreamReader reader = new StreamReader(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/.xylotech/logindata"))
+                using (StreamReader reader = new StreamReader(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/" + dir + "/" + "logindata"))
                 {
                     line1 = reader.ReadLine();
                     line2 = reader.ReadLine();
@@ -42,24 +42,36 @@ namespace Launcher
             string res = Util.generateSession(email, pass,13);
             if (res == "Bad login")
             {
-                //TODO Display Error Mesesage
                 ErrorWindow error = new ErrorWindow();
                 error.Error.Content = "Bad Login";
                 error.Show();
                 return false;
             }
-            else {
+            else if (res == "Servers Down" || res == "" || res == null) {
+                ErrorWindow error = new ErrorWindow();
+                error.Error.Content = "Minecraft login servers are down";
+                error.Show();
+                return false;
+            }
+            else if (res.Split(':').Length != 4) {
+                ErrorWindow error = new ErrorWindow();
+                error.Error.Content = "A unkown error has occured. It may be that the login servers are down";
+                error.Show();
+                return false;
+            }
+            else
+            {
                 return true;
             }
         }
-        public void SaveLoginData(string email, string pass)
+        public void SaveLoginData(string email, string pass, string dir)
         {
             string res = Util.generateSession(email, pass, 13);
             string user = res.Split(':')[2];
             string[] lines = { email, pass,user };
-            System.IO.File.WriteAllLines(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/.xylotech/logindata", lines);
+            System.IO.File.WriteAllLines(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/" + dir + "/" + "logindata", lines);
         }
-        public void LaunchMinecraft(string email, string pass)
+        public void LaunchMinecraft(string email, string pass, string dir)
         {
             string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\"; 
             string res = Util.generateSession(email, pass, 13);
@@ -71,8 +83,8 @@ namespace Launcher
             Debug.Write(appData + ".xylotech/" + "launch.bat");
             Process proc = new Process();
             proc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-            proc.StartInfo.FileName = appData + ".xylotech/" + "launch.bat";
-            proc.StartInfo.Arguments = user + " " + sesID;
+            proc.StartInfo.FileName = appData + dir + '/' + "launch.bat";
+            proc.StartInfo.Arguments = user + " " + sesID + " " + dir;
             //System.Diagnostics.Process.Start(appData  + ".xylotech/" + "launch.bat", user + " " + sesID);
             proc.Start();
         }
