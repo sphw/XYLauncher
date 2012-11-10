@@ -14,5 +14,8 @@
     <Setting Name="ModPack" Type="System.String" Scope="User">
       <Value Profile="(Default)">http://xylocraft.com/ModPack/modpacks.xml</Value>
     </Setting>
+    <Setting Name="Dark" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
