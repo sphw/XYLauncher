@@ -28,10 +28,16 @@ namespace Launcher
 
         public static string httpGET(string URI)
         {
-            WebRequest req = WebRequest.Create(URI);
-            WebResponse resp = req.GetResponse();
-            StreamReader sr = new StreamReader(resp.GetResponseStream());
-            return sr.ReadToEnd().Trim();
+            try
+            {
+                WebRequest req = WebRequest.Create(URI);
+                WebResponse resp = req.GetResponse();
+                StreamReader sr = new StreamReader(resp.GetResponseStream());
+                return sr.ReadToEnd().Trim();
+            }
+            catch { 
+                return "Servers Down";
+            }
         }
 
         /// <summary>
