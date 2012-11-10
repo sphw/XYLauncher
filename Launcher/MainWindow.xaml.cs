@@ -18,6 +18,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Threading;
 using System.ComponentModel;
+using AppLimit.NetSparkle;
 namespace Launcher
 {
     /// <summary>
@@ -30,62 +31,50 @@ namespace Launcher
         BackgroundWorker downWorker = new BackgroundWorker();
         BackgroundWorker updateWorker = new BackgroundWorker();
         Properties.Settings settings = new Properties.Settings();
-        int Selected;
+        ModPackManager modM = new ModPackManager();
+        int Selected = 0;
         public MainWindow()
         {
-            string xml = new System.Net.WebClient().DownloadString(settings.ModPack);
             InitializeComponent();
+            /// XMl Parse - Start 
+            string xml = new System.Net.WebClient().DownloadString(settings.ModPack);
+            List<TextBlock> tempText = new List<TextBlock>();
+            List<string[]> tempArray = new List<string[]>();
+            modM.ParseModPackFile(xml, out tempArray, out tempText);
+            modpacks.AddRange(tempArray);
+            foreach (TextBlock t in tempText) {
+               modsList.Items.Add(t);
+            }
+            /// XML Parse - End
+            
+            /// Setup Background Workers - Start
             downWorker.DoWork += DownloadWorker_Work;
             downWorker.RunWorkerCompleted += DownloadWorker_Complete;
             updateWorker.DoWork += UpdateWorker_Work;
             updateWorker.RunWorkerCompleted += UpdateWorker_Complete;
-            if (!File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/.xylotech/"))
-                System.IO.Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/.xylotech/");
-            Head.Source = loginM.GetHeadIcon();
-            DownloadManager downM = new DownloadManager();
-            FileStream logindata = downM.CreateConfigs();
+            // Setup Background Workers - End
+
+            /// Create Folders - Start
+            if (!File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/" + modpacks[Selected][6] + "/"))
+                System.IO.Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/" + modpacks[Selected][6] + "/");
+            /// Create Folders - End
+
+            /// Fill Content - Start
+            Head.Source = loginM.GetHeadIcon(modpacks[Selected][6]);
+            FileStream logindata = modM.CreateConfigs(modpacks[Selected][6]);
             using (StreamReader reader = new StreamReader(logindata))
             {
                 Username.Text = reader.ReadLine();
                 Password.Password = reader.ReadLine();
             }
-            using (XmlReader reader = XmlReader.Create(new StringReader(xml)))
-            {
-                while (reader.Read())
-                {
-                    StringBuilder tempString = new StringBuilder();
-                    if (reader.Name == "modpack")
-                    {
-                        string[] tempArray = new string[6];
-                        reader.MoveToAttribute("name");
-                        tempArray[4] = reader.Value;
-                        tempString.Append(reader.Value);
-                        reader.MoveToAttribute("author");
-                        tempString.Append(" By " + reader.Value);
-                        reader.MoveToAttribute("description");
-                        tempString.AppendLine("");
-                        tempString.Append(reader.Value);
-                        TextBlock tempText = new TextBlock();
-                        tempText.Text = tempString.ToString();
-                        tempText.Width = 250;
-                        tempText.TextWrapping = TextWrapping.Wrap;
-                        modsList.Items.Add(tempText);
-                        reader.MoveToAttribute("id");
-                        tempArray[0] = reader.Value;
-                        reader.MoveToAttribute("newsURL");
-                        tempArray[1] = tempString.ToString();
-                        tempArray[2] = reader.Value;
-                        reader.MoveToAttribute("image");
-                        tempArray[3] = reader.Value;
-                        reader.MoveToAttribute("url");
-                        tempArray[5] = reader.Value;
-                        modpacks.Add(tempArray);
-
-                    }
-                }
-            }
             modsList.SelectedIndex = 0;
+            /// Fill Content - End
         }
+        /// <summary>
+        /// When someone clicks on a diffrent modpack it sets all of the varibles correctly. 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void changed_Modpack(object sender, SelectionChangedEventArgs e)
         {
             int i = 0;
@@ -96,7 +85,7 @@ namespace Launcher
                     i++;
                     if (s.Text == sa[1])
                     {
-                        Selected = i;
+                        Selected = i-1;
                         newsBrowser.Source = new Uri(sa[2]);
                         BitmapImage logo = new BitmapImage();
                         logo.BeginInit();
@@ -104,23 +93,26 @@ namespace Launcher
                         logo.EndInit();
                         Splash.Source = logo;
                         Name.Text = sa[4];
+                        if (!File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/" + modpacks[Selected][6] + "/"))
+                            System.IO.Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/" + modpacks[Selected][6] + "/");
+                        modM.CreateConfigs(modpacks[Selected][6]);
                     }
                 }
             }
         }
 
-        private void Button_Click_1(object sender, RoutedEventArgs e)
+        private void Login_Click(object sender, RoutedEventArgs e)
         {
             if (loginM.CheckLogin(Username.Text, Password.Password) == true)
             {
                 Progress.Visibility = Visibility.Visible;
                 if (settings.Password == true)
                 {
-                    loginM.SaveLoginData(Username.Text, Password.Password);
+                    loginM.SaveLoginData(Username.Text, Password.Password,modpacks[Selected][6]);
                 }
-                DownloadManager downM = new DownloadManager();
+                
                 string modPackDown;
-                using (StreamReader reader = new StreamReader(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/.xylotech/config"))
+                using (StreamReader reader = new StreamReader(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/" + modpacks[Selected][6] + "/config"))
                 {
                     modPackDown = reader.ReadLine();
                 }
@@ -131,7 +123,7 @@ namespace Launcher
                 else if (modPackDown == "true")
                 {
 
-                    loginM.LaunchMinecraft(Username.Text, Password.Password);
+                    loginM.LaunchMinecraft(Username.Text, Password.Password, modpacks[Selected][6]);
                     Progress.Visibility = Visibility.Hidden;
                     if (settings.CloseLaunch == true)
                     {
@@ -142,7 +134,7 @@ namespace Launcher
         }
         private void DownloadWorker_Complete(object s, RunWorkerCompletedEventArgs e)
         {
-            loginM.LaunchMinecraft(Username.Text, Password.Password);
+            loginM.LaunchMinecraft(Username.Text, Password.Password, modpacks[Selected][6]);
             Progress.Visibility = Visibility.Hidden;
             if (settings.CloseLaunch == true)
             {
@@ -151,15 +143,15 @@ namespace Launcher
         }
         private void DownloadWorker_Work(object sender, DoWorkEventArgs e)
         {
-            DownloadManager downM = new DownloadManager();
-            downM.DownloadModPack(modpacks[Selected][5]);
-            downM.InstallModPack(modpacks[Selected][5]);
+            ModPackManager modM = new ModPackManager();
+            modM.DownloadModPack(modpacks[Selected][5], modpacks[Selected][6]);
+            modM.InstallModPack(modpacks[Selected][5], modpacks[Selected][6]);
         }
-        private void UpdateWorker_Work(object sender, DoWorkEventArgs e) { 
-            DownloadManager downM = new DownloadManager();
-            downM.DeleteCurrentPack();
-            downM.DownloadModPack(modpacks[Selected][5]);
-            downM.InstallModPack(modpacks[Selected][5]);
+        private void UpdateWorker_Work(object sender, DoWorkEventArgs e) {
+            ModPackManager modM = new ModPackManager();
+            modM.DeleteCurrentPack(modpacks[Selected][6]);
+            modM.DownloadModPack(modpacks[Selected][5], modpacks[Selected][6]);
+            modM.InstallModPack(modpacks[Selected][5], modpacks[Selected][6]);
         }
         private void UpdateWorker_Complete(object sender, RunWorkerCompletedEventArgs e) {
             Progress.Visibility = Visibility.Hidden;
@@ -167,7 +159,7 @@ namespace Launcher
             {
                 if (settings.LaunchUpdate == true)
                 {
-                    loginM.LaunchMinecraft(Username.Text, Password.Password);
+                    loginM.LaunchMinecraft(Username.Text, Password.Password, modpacks[Selected][6]);
                     if (settings.CloseLaunch == true)
                     {
                         Application.Current.Shutdown();
@@ -175,14 +167,6 @@ namespace Launcher
                 }
             }
         } 
-        string GetLine(string fileName, int line)
-        {
-            using (var sr = new StreamReader(fileName))
-            {
-                return sr.ReadLine();
-            }
-        }
-
         private void Update_Click(object sender, RoutedEventArgs e)
         {
             Progress.Visibility = Visibility.Visible;
@@ -195,5 +179,6 @@ namespace Launcher
             SettingsWindow sW = new SettingsWindow();
             sW.Show();
         }
+
     }
 }
