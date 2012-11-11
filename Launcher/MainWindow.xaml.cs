@@ -61,11 +61,13 @@ namespace Launcher
 
             /// Fill Content - Start
             Head.Source = loginM.GetHeadIcon(modpacks[Selected][6]);
-            FileStream logindata = modM.CreateConfigs(modpacks[Selected][6]);
-            using (StreamReader reader = new StreamReader(logindata))
+            using (FileStream logindata = modM.CreateConfigs(modpacks[Selected][6]))
             {
-                Username.Text = reader.ReadLine();
-                Password.Password = reader.ReadLine();
+                using (StreamReader reader = new StreamReader(logindata))
+                {
+                    Username.Text = reader.ReadLine();
+                    Password.Password = reader.ReadLine();
+                }
             }
             modsList.SelectedIndex = 0;
             /// Fill Content - End
@@ -95,7 +97,7 @@ namespace Launcher
                         Name.Text = sa[4];
                         if (!File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/" + modpacks[Selected][6] + "/"))
                             System.IO.Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/" + modpacks[Selected][6] + "/");
-                        modM.CreateConfigs(modpacks[Selected][6]);
+                        using(modM.CreateConfigs(modpacks[Selected][6])){}
                     }
                 }
             }
