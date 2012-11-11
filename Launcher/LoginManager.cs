@@ -53,7 +53,7 @@ namespace Launcher
                 error.Show();
                 return false;
             }
-            else if (res.Split(':').Length != 4) {
+            else if (res.Split(':').Length != 5) {
                 ErrorWindow error = new ErrorWindow();
                 error.Error.Content = "A unkown error has occured. It may be that the login servers are down";
                 error.Show();
