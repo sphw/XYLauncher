@@ -7,4 +7,4 @@ Awesomium: http://awesomium.com/
 Mahapps.Metro: http://mahapps.com/MahApps.Metro/
 
 ## License
-This project uses the GPL license.
+This project uses the LGPL license.
