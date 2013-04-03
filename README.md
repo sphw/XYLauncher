@@ -1,4 +1,7 @@
 # XYLauncher
+# Depracted!
+This project is being depracted in favor of a rewrite that will be going on github soon.
+
 ## Info
 This is a launcher for the video game Minecraft. It is designed for modpacks.  The way the modpacks are setup is supposed to be compatible with the Feed The Beast Launcher that was created. They have made some changes that I will have to review to bring this Launcher up to the spec.
 ## Credits
